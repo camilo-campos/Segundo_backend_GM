@@ -3,6 +3,8 @@ import select
 import json
 import requests
 import os
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from dotenv import load_dotenv
 from datetime import datetime
 
@@ -147,6 +149,7 @@ def main():
                         except Exception as e:
                             print(f"Error al enviar a endpoint individual: {e}")
 
+
                     # Verificar si tenemos suficientes datos para enviar a la predicción unificada
                     # Lista de campos requeridos según PrediccionBombaInput
                     campos_requeridos = [
@@ -201,6 +204,7 @@ def main():
                         try:
                             # Mostrar los datos que se van a enviar
                             print("Enviando datos:")
+                            
                             for campo, valor in datos_sensores.items():
                                 print(f"  - {campo}: {valor}")
                                 
@@ -237,5 +241,33 @@ def main():
         import time
         time.sleep(5)
 
+# Definir un manejador HTTP simple
+class SimpleHTTPHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        """Manejador para peticiones GET"""
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        self.wfile.write(b"<html><body><h1>Listener de Bomba A funcionando</h1><p>El servicio esta activo y escuchando notificaciones PostgreSQL.</p></body></html>")
+    
+    def log_message(self, format, *args):
+        """Sobrescribir el método de logging para evitar mensajes excesivos"""
+        return
+
+def run_http_server():
+    """Función para ejecutar el servidor HTTP en un hilo separado"""
+    # Obtener el puerto del entorno o usar 8080 por defecto (requerido por IBM Cloud Engine)
+    port = int(os.environ.get('PORT', 8080))
+    server_address = ('', port)
+    httpd = HTTPServer(server_address, SimpleHTTPHandler)
+    print(f"Servidor HTTP iniciado en el puerto {port}")
+    httpd.serve_forever()
+
 if __name__ == '__main__':
+    # Iniciar el servidor HTTP en un hilo separado
+    http_thread = threading.Thread(target=run_http_server)
+    http_thread.daemon = True  # El hilo terminará cuando el programa principal termine
+    http_thread.start()
+    
+    # Ejecutar el listener en el hilo principal
     main()

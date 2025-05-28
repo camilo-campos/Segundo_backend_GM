@@ -14,9 +14,10 @@ COPY ./ /code/
 
 # Definir variables de entorno por defecto
 # Estas pueden ser sobreescritas al ejecutar el contenedor
+ENV PORT=8080
 
-
-# No es necesario exponer puertos ya que este servicio no escucha conexiones entrantes
+# Exponer el puerto 8080 para IBM Cloud Engine
+EXPOSE 8080
 
 # Comando para ejecutar el listener
 CMD ["python", "listener.py"]
