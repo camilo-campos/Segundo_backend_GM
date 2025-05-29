@@ -20,4 +20,4 @@ COPY ./ /code/
 EXPOSE 8080
 
 # Comando para ejecutar el listener
-CMD ["python", "listener.py"]
+CMD ["python", "listener_bomba_b.py"]
