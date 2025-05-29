@@ -16,7 +16,8 @@ COPY ./ /code/
 # Estas pueden ser sobreescritas al ejecutar el contenedor
 
 
-# No es necesario exponer puertos ya que este servicio no escucha conexiones entrantes
+# Exponer el puerto 8080 para IBM Cloud Engine
+EXPOSE 8080
 
 # Comando para ejecutar el listener
 CMD ["python", "listener.py"]
