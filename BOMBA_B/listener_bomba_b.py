@@ -88,7 +88,8 @@ def conectar():
 def main():
     intentos = 0
     max_intentos = 10
-    datos_sensores = {}
+    # Modificación: cambiar a un diccionario donde cada clave es un tiempo_sensor
+    datos_por_tiempo = {}
 
     while intentos < max_intentos:
         conn, cur = conectar()
@@ -115,25 +116,37 @@ def main():
                     payload = json.loads(notify.payload)
                     print(f"Recibido en {canal}: {payload}")
 
+                    # Extraer tiempo_sensor del payload (solo para agrupación)
+                    tiempo_sensor = payload.get('tiempo_sensor')
+                    
+                    if not tiempo_sensor:
+                        print(f"ADVERTENCIA: Notificación sin tiempo_sensor: {payload}")
+                        continue
+
+                    # Inicializar el diccionario para este tiempo si no existe
+                    if tiempo_sensor not in datos_por_tiempo:
+                        datos_por_tiempo[tiempo_sensor] = {}
+
                     if canal in CANAL_TO_CAMPO:
                         campo = CANAL_TO_CAMPO[canal]
-                        datos_sensores[campo] = payload.get('valor')
+                        datos_por_tiempo[tiempo_sensor][campo] = payload.get('valor')
                         
-                        # Enviar a endpoint individual si existe
+                        # Enviar a endpoint individual si existe (sin el tiempo_sensor)
                         if canal in CANAL_ENDPOINTS:
                             try:
                                 endpoint = CANAL_ENDPOINTS[canal]
+                                # Solo enviar id_sensor y valor
                                 data = {
                                     'id_sensor': payload.get('id_sensor'),
                                     'valor': payload.get('valor')
                                 }
                                 print(f"Enviando a endpoint individual: {endpoint}")
-                                response = requests.post(endpoint, json=data)
+                                response = requests.post(endpoint, json=data, timeout=30)
                                 print(f"Respuesta: {response.status_code}")
                             except Exception as e:
                                 print(f"Error enviando a endpoint individual: {e}")
 
-                    # Verificar si tenemos todos los valores para enviar al endpoint de predicción
+                    # Lista de todos los campos requeridos
                     required_fields = [
                         'corriente_motor', 'excentricidad_bomba', 'flujo_descarga_ap',
                         'flujo_agua_domo_ap', 'flujo_agua_domo_mp', 'flujo_agua_recalentador',
@@ -142,44 +155,52 @@ def main():
                         'vibracion_x_descanso', 'vibracion_y_descanso', 'voltaje_barra'
                     ]
                     
-                    # Verificar cuántos campos tenemos
+                    # Verificar los datos para el tiempo actual
+                    datos_sensores = datos_por_tiempo[tiempo_sensor]
                     campos_presentes = [field for field in required_fields if field in datos_sensores]
                     campos_faltantes = [field for field in required_fields if field not in datos_sensores]
                     
-                    print(f"Estado actual: {len(campos_presentes)}/{len(required_fields)} campos recopilados")
+                    print(f"Estado para tiempo {tiempo_sensor}: {len(campos_presentes)}/{len(required_fields)} campos recopilados")
                     
-                    if len(campos_presentes) == len(required_fields):  # Solo enviamos cuando tenemos TODOS los campos
-                        print(f"Datos suficientes recopilados ({len(campos_presentes)}/{len(required_fields)}), enviando a backend...")
-                        if campos_faltantes:
-                            print(f"Campos faltantes: {campos_faltantes}")
-
+                    # Si tenemos todos los campos para este tiempo, enviamos a la predicción
+                    if len(campos_presentes) == len(required_fields):
+                        print(f"Datos suficientes recopilados para tiempo {tiempo_sensor} ({len(campos_presentes)}/{len(required_fields)}), enviando a backend...")
+                        
                         try:
                             # Mostrar los datos que se van a enviar
-                            print("Enviando datos:")
+                            print(f"Enviando datos para tiempo {tiempo_sensor}:")
                             
                             for campo, valor in datos_sensores.items():
                                 print(f"  - {campo}: {valor}")
                                 
-                            # Preparar los datos para enviar - debe coincidir con PrediccionBombaBInput
-                            datos_a_enviar = datos_sensores
-                            # No incluimos timestamp ya que no está en el esquema PrediccionBombaBInput
+                            # Preparar los datos para enviar (sin incluir tiempo_sensor)
+                            datos_a_enviar = datos_sensores.copy()
                             
-                            res = requests.post(PREDICCION_URL, json=datos_a_enviar)
+                            res = requests.post(PREDICCION_URL, json=datos_a_enviar, timeout=60)
                             if res.status_code == 200:
-                                print(f"Predicción unificada enviada exitosamente: {res.status_code}")
+                                print(f"Predicción unificada enviada exitosamente para tiempo {tiempo_sensor}: {res.status_code}")
                                 try:
                                     print(f"  Respuesta: {res.json()}")
                                 except:
                                     print(f"  Respuesta: {res.text[:100] if res.text else 'Sin contenido'}")
-                                # Reiniciar el diccionario después del envío exitoso
-                                datos_sensores = {}
+                                # Eliminar este conjunto de datos después del envío exitoso
+                                del datos_por_tiempo[tiempo_sensor]
                             else:
-                                print(f"Error {res.status_code} al enviar la predicción unificada")
+                                print(f"Error {res.status_code} al enviar la predicción unificada para tiempo {tiempo_sensor}")
                                 print(f"  Respuesta: {res.text[:200] if res.text else 'Sin contenido'}")
                         except Exception as e:
-                            print(f"Error al enviar la predicción unificada: {e}")
+                            print(f"Error al enviar la predicción unificada para tiempo {tiempo_sensor}: {e}")
                             import traceback
                             traceback.print_exc()
+                    
+                    # Limpieza de conjuntos antiguos incompletos
+                    if len(datos_por_tiempo) > 10:
+                        print("Limpiando conjuntos de datos antiguos incompletos...")
+                        tiempos_ordenados = sorted(datos_por_tiempo.keys())
+                        for t in tiempos_ordenados[:-10]:
+                            if len(datos_por_tiempo[t]) < len(required_fields):
+                                print(f"Eliminando conjunto incompleto para tiempo {t} con {len(datos_por_tiempo[t])}/{len(required_fields)} campos")
+                                del datos_por_tiempo[t]
 
         except Exception as e:
             print(f"Error inesperado: {e}")
