@@ -86,18 +86,39 @@ def conectar():
         return None, None
 
 def main():
-    intentos = 0
-    max_intentos = 10
+    intentos_conexion = 0
+    max_intentos_inicial = 10
+    reconexiones_consecutivas = 0
+    max_reconexiones = 50  # Límite para reconexiones durante ejecución
+    tiempo_espera_base = 5
     # Modificación: cambiar a un diccionario donde cada clave es un tiempo_sensor
     datos_por_tiempo = {}
 
-    while intentos < max_intentos:
+    while True:
         conn, cur = conectar()
         if not conn:
-            intentos += 1
-            print(f"Reintentando... ({intentos}/{max_intentos})")
+            intentos_conexion += 1
+            reconexiones_consecutivas += 1
+
+            # Aplicar backoff exponencial con límite máximo de 60 segundos
+            tiempo_espera = min(tiempo_espera_base * (2 ** min(intentos_conexion - 1, 4)), 60)
+
+            print(f"Reintento {intentos_conexion} (reconexiones consecutivas: {reconexiones_consecutivas}/{max_reconexiones})")
+            print(f"Esperando {tiempo_espera} segundos antes del próximo intento...")
+
+            # Verificar si hemos excedido los límites
+            if intentos_conexion >= max_intentos_inicial and reconexiones_consecutivas >= max_reconexiones:
+                print(f"Se alcanzó el límite de {max_reconexiones} reconexiones consecutivas fallidas. Deteniendo...")
+                break
+
+            import time
+            time.sleep(tiempo_espera)
             continue
-        intentos = 0
+
+        # Reiniciar contadores al conectar exitosamente
+        intentos_conexion = 0
+        reconexiones_consecutivas = 0
+        print("Conexión exitosa. Contadores de reintento reiniciados.")
 
         try:
             while True:
@@ -105,8 +126,10 @@ def main():
                     try:
                         cur.execute("SELECT 1")
                         continue
-                    except psycopg2.OperationalError:
-                        print("Conexión perdida. Reconectando...")
+                    except psycopg2.OperationalError as e:
+                        print(f"Conexión perdida (heartbeat falló): {e}")
+                        print("Reconectando...")
+                        reconexiones_consecutivas += 1
                         break
 
                 conn.poll()
@@ -204,6 +227,9 @@ def main():
 
         except Exception as e:
             print(f"Error inesperado: {e}")
+            import traceback
+            traceback.print_exc()
+            reconexiones_consecutivas += 1
 
         # Cierre de conexión
         try:
@@ -212,11 +238,14 @@ def main():
             if conn and not conn.closed:
                 conn.close()
             print("Conexión cerrada. Reconectando...")
-        except:
-            pass
+        except Exception as e:
+            print(f"Error al cerrar conexión: {e}")
 
+        # Backoff exponencial antes de reconectar
+        tiempo_espera = min(tiempo_espera_base * (2 ** min(reconexiones_consecutivas - 1, 4)), 60)
+        print(f"Esperando {tiempo_espera} segundos antes de reconectar...")
         import time
-        time.sleep(5)
+        time.sleep(tiempo_espera)
 
 # Definir un manejador HTTP simple
 class SimpleHTTPHandler(BaseHTTPRequestHandler):
