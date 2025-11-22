@@ -208,39 +208,9 @@ def main():
                     
                     print(f"Estado para tiempo {tiempo_sensor}: {len(campos_presentes)}/{len(campos_requeridos)} campos recopilados")
                     
-                    # Si tenemos al menos 15 campos, intentamos enviar con valores por defecto para los faltantes
-                    if len(campos_presentes) >= 15:
-                        print(f"Datos suficientes recopilados para tiempo {tiempo_sensor}, enviando a predicción unificada...")
-                        
-                        # Valores por defecto para campos comunes que podrían faltar
-                        valores_por_defecto = {
-                            'temp_ambiental': 25.0,
-                            'mw_brutos_gas': 100.0,
-                            'salida_bomba': 1000.0,
-                            'flujo_agua': 500.0,
-                            'flujo_agua_domo_ap': 500.0,
-                            'flujo_agua_domo_mp': 500.0,
-                            'flujo_agua_recalentador': 300.0,
-                            'posicion_valvula_recirc': 50.0,
-                            'presion_agua_mp': 30.0,
-                            'presion_succion_baa': 5.0,
-                            'excentricidad_bomba': 0.05,
-                            'temperatura_estator': 70.0,
-                            'flujo_salida_12fpmfc': 400.0
-                        }
-                        
-                        # Añadir valores por defecto para los campos faltantes
-                        for campo in campos_faltantes:
-                            if campo in valores_por_defecto:
-                                datos_sensores[campo] = valores_por_defecto[campo]
-                                print(f"Usando valor por defecto para '{campo}': {valores_por_defecto[campo]}")
-                        
-                        # Verificar nuevamente si tenemos todos los campos requeridos
-                        campos_faltantes_final = [campo for campo in campos_requeridos if campo not in datos_sensores]
-                        
-                        if campos_faltantes_final:
-                            print(f"Aún faltan campos obligatorios: {campos_faltantes_final}")
-                            continue
+                    # Solo enviar cuando tengamos TODOS los campos requeridos
+                    if len(campos_presentes) == len(campos_requeridos):
+                        print(f"Todos los campos recopilados para tiempo {tiempo_sensor}, enviando a predicción unificada...")
                         
                         try:
                             # Mostrar los datos que se van a enviar
@@ -268,6 +238,8 @@ def main():
                             print(f"Error al enviar la predicción unificada: {e}")
                             import traceback
                             traceback.print_exc()
+                    else:
+                        print(f"Esperando más datos. Faltan {len(campos_faltantes)} campos: {campos_faltantes}")
 
                     # Limpieza de conjuntos antiguos incompletos
                     if len(datos_por_tiempo) > 10:
