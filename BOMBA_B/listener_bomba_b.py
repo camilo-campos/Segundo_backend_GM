@@ -24,8 +24,16 @@ DB_CONFIG = {
 BASE_URL_B = os.environ.get('BASE_URL_B')
 PREDICCION_URL = f"{BASE_URL_B}/predecir-bomba-b"
 
-# Preservar la compatibilidad con endpoints individuales
+# API Key para autenticacion con el backend principal
+API_KEY = os.environ.get('API_KEY', 'gm-internal-service-key-2025')
+HEADERS = {
+    'Content-Type': 'application/json',
+    'X-API-Key': API_KEY
+}
+
+# Mapeo CANAL -> ENDPOINT POST (actualizado 2025-02-23)
 CANAL_ENDPOINTS = {
+    # Endpoints principales
     'canal_sensores_corriente_b': f"{BASE_URL_B}/prediccion_corriente",
     'canal_excentricidad_bomba_b': f"{BASE_URL_B}/prediccion_excentricidad_bomba",
     'canal_flujo_descarga_b': f"{BASE_URL_B}/prediccion_flujo_descarga",
@@ -41,10 +49,27 @@ CANAL_ENDPOINTS = {
     'canal_vibracion_x_descanso_b': f"{BASE_URL_B}/prediccion_vibracion_x_descanso",
     'canal_vibracion_y_descanso_b': f"{BASE_URL_B}/prediccion_vibracion_y_descanso",
     'canal_voltaje_barra_b': f"{BASE_URL_B}/prediccion_voltaje_barra",
+
+    # Temperaturas descanso
+    'canal_temperatura_descanso_interno_bomba_b': f"{BASE_URL_B}/prediccion_temp_descanso_bomba",
+    'canal_temperatura_descanso_interna_empuje_bomba_b': f"{BASE_URL_B}/prediccion_temp_descanso_empuje",
+    'canal_temperatura_descanso_interna_motor_bomba_b': f"{BASE_URL_B}/prediccion_temp_descanso_motor",
+
+    # Vibraciones externas
+    'canal_vibracion_x_descanso_externo_b': f"{BASE_URL_B}/prediccion_vibracion_x_descanso_externo",
+    'canal_vibracion_y_descanso_externo_b': f"{BASE_URL_B}/prediccion_vibracion_y_descanso_externo",
+
+    # Nuevos endpoints
+    'canal_presion_succion_baa_b': f"{BASE_URL_B}/prediccion_presion_succion_baa",
+    'canal_posicion_valvula_recirc_b': f"{BASE_URL_B}/prediccion_posicion_valvula_recirc",
+    'canal_flujo_domo_ap_compensated_b': f"{BASE_URL_B}/prediccion_flujo_domo_ap_compensated",
+    'canal_mw_brutos_generacion_gas_b': f"{BASE_URL_B}/prediccion_mw_brutos_generacion_gas",
+    'canal_presion_agua_econ_ap_b': f"{BASE_URL_B}/prediccion_presion_agua_econ_ap",
 }
 
-# Mapeo de nombre de canal a campo del modelo
+# Mapeo de nombre de canal a campo del modelo (actualizado 2025-02-23)
 CANAL_TO_CAMPO = {
+    # Campos principales
     'canal_sensores_corriente_b': 'corriente_motor',
     'canal_excentricidad_bomba_b': 'excentricidad_bomba',
     'canal_flujo_descarga_b': 'flujo_descarga_ap',
@@ -59,10 +84,27 @@ CANAL_TO_CAMPO = {
     'canal_vibracion_axial_empuje_b': 'vibracion_axial',
     'canal_vibracion_x_descanso_b': 'vibracion_x_descanso',
     'canal_vibracion_y_descanso_b': 'vibracion_y_descanso',
-    'canal_voltaje_barra_b': 'voltaje_barra'
+    'canal_voltaje_barra_b': 'voltaje_barra',
+
+    # Temperaturas descanso
+    'canal_temperatura_descanso_interno_bomba_b': 'temp_descanso_bomba',
+    'canal_temperatura_descanso_interna_empuje_bomba_b': 'temp_descanso_empuje',
+    'canal_temperatura_descanso_interna_motor_bomba_b': 'temp_descanso_motor',
+
+    # Vibraciones externas
+    'canal_vibracion_x_descanso_externo_b': 'vibracion_x_externo',
+    'canal_vibracion_y_descanso_externo_b': 'vibracion_y_externo',
+
+    # Nuevos campos
+    'canal_presion_succion_baa_b': 'presion_succion_baa',
+    'canal_posicion_valvula_recirc_b': 'posicion_valvula_recirc',
+    'canal_flujo_domo_ap_compensated_b': 'flujo_domo_ap_compensated',
+    'canal_mw_brutos_generacion_gas_b': 'mw_brutos_generacion_gas',
+    'canal_presion_agua_econ_ap_b': 'presion_agua_econ_ap',
 }
 
-CANALES = list(CANAL_TO_CAMPO.keys())
+# Lista de canales a escuchar (usa CANAL_ENDPOINTS para incluir todos)
+CANALES = list(CANAL_ENDPOINTS.keys())
 
 def conectar():
     """Establece una nueva conexión a la base de datos y configura los canales de escucha"""
@@ -164,7 +206,7 @@ def main():
                                     'valor': payload.get('valor')
                                 }
                                 print(f"Enviando a endpoint individual: {endpoint}")
-                                response = requests.post(endpoint, json=data, timeout=30)
+                                response = requests.post(endpoint, json=data, headers=HEADERS, timeout=30)
                                 print(f"Respuesta: {response.status_code}")
                             except Exception as e:
                                 print(f"Error enviando a endpoint individual: {e}")
@@ -199,7 +241,7 @@ def main():
                             # Preparar los datos para enviar (sin incluir tiempo_sensor)
                             datos_a_enviar = datos_sensores.copy()
                             
-                            res = requests.post(PREDICCION_URL, json=datos_a_enviar, timeout=60)
+                            res = requests.post(PREDICCION_URL, json=datos_a_enviar, headers=HEADERS, timeout=60)
                             if res.status_code == 200:
                                 print(f"Predicción unificada enviada exitosamente para tiempo {tiempo_sensor}: {res.status_code}")
                                 try:

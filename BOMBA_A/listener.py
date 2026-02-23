@@ -23,61 +23,81 @@ DB_CONFIG = {
 BASE_URL = os.environ.get('BASE_URL')
 PREDICCION_URL = f"{BASE_URL}/predecir-bomba"
 
-# Mapeo de nombre de canal a campo del modelo para bomba A
-CANAL_TO_CAMPO = {
-    # Canales originales de bomba A
-    'canal_sensores_corriente': 'corriente_motor',
-    'canal_flujo_salida_12fpmfc': 'flujo_salida_12fpmfc',
-    'canal_temperatura_estator': 'temperatura_estator',
-    'canal_presion_succion_baa': 'presion_succion_baa',
-    'canal_presion_agua_mp': 'presion_agua_mp',
-    'canal_posicion_valvula_recirc': 'posicion_valvula_recirc',
-    
-    # Canales con rutas corregidas para bomba A
-    'canal_voltaje_barra': 'voltaje_barra',
-    'canal_vibracion_axial_descanso': 'vibracion_axial',
-    'canal_temperatura_descanso_interno_bomba_1a': 'temp_bomba',
-    'canal_temperatura_descanso_interna_motor_bomba_1a': 'temp_motor',
-    
-    # Canales para flujos de agua y otros de bomba A
-    'canal_flujo_agua_vapor_alta': 'flujo_agua',
-    'canal_flujo_agua_recalentador': 'flujo_agua_recalentador',
-    'canal_flujo_agua_domo_mp': 'flujo_agua_domo_mp',
-    'canal_flujo_agua_domo_ap': 'flujo_agua_domo_ap',
-    'canal_excentricidad_bomba': 'excentricidad_bomba',
+# API Key para autenticacion con el backend principal
+API_KEY = os.environ.get('API_KEY', 'gm-internal-service-key-2025')
+HEADERS = {
+    'Content-Type': 'application/json',
+    'X-API-Key': API_KEY
+}
 
-    # Otros canales de bomba A
+# Mapeo de nombre de canal a campo del modelo para bomba A (actualizado 2025-02-23)
+CANAL_TO_CAMPO = {
+    # Canales principales
+    'canal_sensores_corriente': 'corriente_motor',
     'canal_salida_agua': 'salida_bomba',
     'canal_presion_agua': 'presion_agua',
     'canal_mw_brutos_gas': 'mw_brutos_gas',
-    'canal_temp_empuje_bomba_1a': 'temp_empuje',
-    
-    # Canal para temperatura ambiental
     'canal_temperatura_ambiental': 'temp_ambiental',
+    'canal_temperatura_descanso_interno_bomba_1a': 'temp_bomba',
+    'canal_temperatura_descanso_interna_empuje_bomba_1a': 'temp_empuje',
+    'canal_temperatura_descanso_interna_motor_bomba_1a': 'temp_motor',
+    'canal_vibracion_axial_descanso': 'vibracion_axial',
+    'canal_voltaje_barra': 'voltaje_barra',
+    'canal_excentricidad_bomba': 'excentricidad_bomba',
+    'canal_flujo_agua_domo_ap': 'flujo_agua_domo_ap',
+    'canal_flujo_agua_domo_mp': 'flujo_agua_domo_mp',
+    'canal_flujo_agua_recalentador': 'flujo_agua_recalentador',
+    'canal_flujo_agua_vapor_alta': 'flujo_agua',
+    'canal_posicion_valvula_recirc': 'posicion_valvula_recirc',
+    'canal_presion_agua_mp': 'presion_agua_mp',
+    'canal_presion_succion_baa': 'presion_succion_baa',
+    'canal_temperatura_estator': 'temperatura_estator',
+    'canal_flujo_salida_12fpmfc': 'flujo_salida_12fpmfc',
+
+    # Vibraciones internas y externas
+    'canal_vibracion_x_descanso_interno_bomba_1a': 'vibracion_x_interno',
+    'canal_vibracion_y_descanso_interno_bomba_1a': 'vibracion_y_interno',
+    'canal_vibracion_x_descanso_externo': 'vibracion_x_externo',
+    'canal_vibracion_y_descanso_externo': 'vibracion_y_externo',
+
+    # Nuevos campos compartidos
+    'canal_temperatura_agua_alim_domo_mp': 'temp_agua_alim_domo_mp',
+    'canal_flujo_domo_ap_compensated': 'flujo_domo_ap_compensated',
 }
 
-# Preservar la compatibilidad con endpoints individuales (opcional)
+# Mapeo CANAL -> ENDPOINT POST (actualizado 2025-02-23)
 CANAL_ENDPOINTS = {
+    # Endpoints principales
     'canal_sensores_corriente': f"{BASE_URL}/prediccion_corriente",
-    'canal_flujo_salida_12fpmfc': f"{BASE_URL}/prediccion_flujo-salida-12fpmfc",
-    'canal_temperatura_estator': f"{BASE_URL}/prediccion_temperatura-estator",
-    'canal_presion_succion_baa': f"{BASE_URL}/prediccion_presion-succion-baa",
-    'canal_presion_agua_mp': f"{BASE_URL}/prediccion_presion-agua-mp",
-    'canal_posicion_valvula_recirc': f"{BASE_URL}/prediccion_posicion-valvula-recirc",
-    'canal_voltaje_barra': f"{BASE_URL}/prediccion_voltaje-barra",
-    'canal_vibracion_axial_descanso': f"{BASE_URL}/prediccion_vibracion-axial",
-    'canal_temperatura_descanso_interno_bomba_1a': f"{BASE_URL}/prediccion_temp-descanso-bomba-1a",
-    'canal_temperatura_descanso_interna_motor_bomba_1a': f"{BASE_URL}/prediccion_temp-motor-bomba-1a",
-    'canal_flujo_agua_vapor_alta': f"{BASE_URL}/prediccion_flujo-agua-vapor-alta",
-    'canal_flujo_agua_recalentador': f"{BASE_URL}/prediccion_flujo-agua-recalentador",
-    'canal_flujo_agua_domo_mp': f"{BASE_URL}/prediccion_flujo-agua-domo-mp",
-    'canal_flujo_agua_domo_ap': f"{BASE_URL}/prediccion_flujo-agua-domo-ap",
-    'canal_excentricidad_bomba': f"{BASE_URL}/prediccion_excentricidad-bomba",
     'canal_salida_agua': f"{BASE_URL}/prediccion_salida-agua",
     'canal_presion_agua': f"{BASE_URL}/prediccion_presion-agua",
     'canal_mw_brutos_gas': f"{BASE_URL}/prediccion_mw-brutos-gas",
-    'canal_temp_empuje_bomba_1a': f"{BASE_URL}/prediccion_temp-empuje-bomba-1a",
     'canal_temperatura_ambiental': f"{BASE_URL}/prediccion_temperatura-ambiental",
+    'canal_temperatura_descanso_interno_bomba_1a': f"{BASE_URL}/prediccion_temp-descanso-bomba-1a",
+    'canal_temperatura_descanso_interna_empuje_bomba_1a': f"{BASE_URL}/prediccion_temp-empuje-bomba-1a",
+    'canal_temperatura_descanso_interna_motor_bomba_1a': f"{BASE_URL}/prediccion_temp-motor-bomba-1a",
+    'canal_vibracion_axial_descanso': f"{BASE_URL}/prediccion_vibracion-axial",
+    'canal_voltaje_barra': f"{BASE_URL}/prediccion_voltaje-barra",
+    'canal_excentricidad_bomba': f"{BASE_URL}/prediccion_excentricidad-bomba",
+    'canal_flujo_agua_domo_ap': f"{BASE_URL}/prediccion_flujo-agua-domo-ap",
+    'canal_flujo_agua_domo_mp': f"{BASE_URL}/prediccion_flujo-agua-domo-mp",
+    'canal_flujo_agua_recalentador': f"{BASE_URL}/prediccion_flujo-agua-recalentador",
+    'canal_flujo_agua_vapor_alta': f"{BASE_URL}/prediccion_flujo-agua-vapor-alta",
+    'canal_posicion_valvula_recirc': f"{BASE_URL}/prediccion_posicion-valvula-recirc",
+    'canal_presion_agua_mp': f"{BASE_URL}/prediccion_presion-agua-mp",
+    'canal_presion_succion_baa': f"{BASE_URL}/prediccion_presion-succion-baa",
+    'canal_temperatura_estator': f"{BASE_URL}/prediccion_temperatura-estator",
+    'canal_flujo_salida_12fpmfc': f"{BASE_URL}/prediccion_flujo-salida-12fpmfc",
+
+    # Vibraciones internas y externas
+    'canal_vibracion_x_descanso_interno_bomba_1a': f"{BASE_URL}/prediccion_vibracion-x-interno",
+    'canal_vibracion_y_descanso_interno_bomba_1a': f"{BASE_URL}/prediccion_vibracion-y-interno",
+    'canal_vibracion_x_descanso_externo': f"{BASE_URL}/prediccion_vibracion-x-externo",
+    'canal_vibracion_y_descanso_externo': f"{BASE_URL}/prediccion_vibracion-y-externo",
+
+    # Nuevos endpoints compartidos
+    'canal_temperatura_agua_alim_domo_mp': f"{BASE_URL}/prediccion_temperatura-agua-alim-domo-mp",
+    'canal_flujo_domo_ap_compensated': f"{BASE_URL}/prediccion_flujo-domo-ap-compensated",
 }
 
 # Lista de canales a escuchar para bomba A
@@ -184,7 +204,7 @@ def main():
                                     'id_sensor': payload.get('id_sensor'),
                                     'valor': payload.get('valor')
                                 }
-                                res = requests.post(endpoint, json=data, timeout=30)
+                                res = requests.post(endpoint, json=data, headers=HEADERS, timeout=30)
                                 print(f"Enviado a endpoint individual {endpoint}: {res.status_code}")
                         except Exception as e:
                             print(f"Error al enviar a endpoint individual: {e}")
@@ -222,7 +242,7 @@ def main():
                             # Preparar los datos para enviar (sin incluir tiempo_sensor)
                             datos_a_enviar = datos_sensores.copy()
                             
-                            res = requests.post(PREDICCION_URL, json=datos_a_enviar, timeout=60)
+                            res = requests.post(PREDICCION_URL, json=datos_a_enviar, headers=HEADERS, timeout=60)
                             if res.status_code == 200:
                                 print(f"Predicción unificada enviada exitosamente para tiempo {tiempo_sensor}: {res.status_code}")
                                 try:
