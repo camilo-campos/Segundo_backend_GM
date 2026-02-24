@@ -38,4 +38,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:8080/ || exit 1
 
 # Usar exec form para mejor manejo de señales
-CMD ["python", "-u", "listener.py"]
+CMD ["python", "-u", "listener_bitacoras.py"]
