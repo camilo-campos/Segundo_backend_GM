@@ -31,86 +31,88 @@ HEADERS = {
     'X-API-Key': API_KEY
 }
 
-# Mapeo CANAL -> ENDPOINT POST (actualizado 2025-02-23)
+# Mapeo CANAL -> ENDPOINT POST (actualizado 2026-02-25)
+# NOTA: Algunos canales son compartidos con Bomba A (tablas sin _b) porque
+# gm_influx inserta datos en esas tablas para ambas bombas.
 CANAL_ENDPOINTS = {
-    # Endpoints principales
+    # Endpoints exclusivos Bomba B
     'canal_sensores_corriente_b': f"{BASE_URL_B}/prediccion_corriente",
     'canal_excentricidad_bomba_b': f"{BASE_URL_B}/prediccion_excentricidad_bomba",
     'canal_flujo_descarga_b': f"{BASE_URL_B}/prediccion_flujo_descarga",
     'canal_flujo_agua_domo_ap_b': f"{BASE_URL_B}/prediccion_flujo_agua_domo_ap",
     'canal_flujo_agua_domo_mp_b': f"{BASE_URL_B}/prediccion_flujo_agua_domo_mp",
-    'canal_flujo_agua_recalentador_b': f"{BASE_URL_B}/prediccion_flujo_agua_recalentador",
-    'canal_flujo_agua_vapor_alta_b': f"{BASE_URL_B}/prediccion_flujo_agua_vapor_alta",
     'canal_presion_agua_b': f"{BASE_URL_B}/prediccion_presion_agua",
-    'canal_temperatura_ambiental_b': f"{BASE_URL_B}/prediccion_temperatura_ambiental",
     'canal_temperatura_agua_alim_b': f"{BASE_URL_B}/prediccion_temperatura_agua_alim",
     'canal_temperatura_estator_b': f"{BASE_URL_B}/prediccion_temperatura_estator",
     'canal_vibracion_axial_empuje_b': f"{BASE_URL_B}/prediccion_vibracion_axial_empuje",
     'canal_vibracion_x_descanso_b': f"{BASE_URL_B}/prediccion_vibracion_x_descanso",
     'canal_vibracion_y_descanso_b': f"{BASE_URL_B}/prediccion_vibracion_y_descanso",
-    'canal_voltaje_barra_b': f"{BASE_URL_B}/prediccion_voltaje_barra",
 
-    # Temperaturas descanso
+    # Temperaturas descanso (exclusivos Bomba B)
     'canal_temperatura_descanso_interno_bomba_b': f"{BASE_URL_B}/prediccion_temp_descanso_bomba",
     'canal_temperatura_descanso_interna_empuje_bomba_b': f"{BASE_URL_B}/prediccion_temp_descanso_empuje",
     'canal_temperatura_descanso_interna_motor_bomba_b': f"{BASE_URL_B}/prediccion_temp_descanso_motor",
 
-    # Vibraciones externas
+    # Vibraciones externas (exclusivos Bomba B)
     'canal_vibracion_x_descanso_externo_b': f"{BASE_URL_B}/prediccion_vibracion_x_descanso_externo",
     'canal_vibracion_y_descanso_externo_b': f"{BASE_URL_B}/prediccion_vibracion_y_descanso_externo",
 
-    # Nuevos endpoints
+    # Otros exclusivos Bomba B
     'canal_presion_succion_baa_b': f"{BASE_URL_B}/prediccion_presion_succion_baa",
     'canal_posicion_valvula_recirc_b': f"{BASE_URL_B}/prediccion_posicion_valvula_recirc",
-    'canal_flujo_domo_ap_compensated_b': f"{BASE_URL_B}/prediccion_flujo_domo_ap_compensated",
-    'canal_mw_brutos_generacion_gas_b': f"{BASE_URL_B}/prediccion_mw_brutos_generacion_gas",
-    'canal_presion_agua_econ_ap_b': f"{BASE_URL_B}/prediccion_presion_agua_econ_ap",
 
-    # Endpoint faltante
-    'canal_temperatura_estator_fase_b_b': f"{BASE_URL_B}/prediccion_temperatura_estator_b",
+    # Canales redirigidos a tablas compartidas con Bomba A
+    # (gm_influx inserta en estas tablas sin _b, no en versiones _b)
+    'canal_flujo_agua_recalentador': f"{BASE_URL_B}/prediccion_flujo_agua_recalentador",
+    'canal_flujo_agua_vapor_alta': f"{BASE_URL_B}/prediccion_flujo_agua_vapor_alta",
+    'canal_temperatura_ambiental': f"{BASE_URL_B}/prediccion_temperatura_ambiental",
+    'canal_voltaje_barra': f"{BASE_URL_B}/prediccion_voltaje_barra",
+    'canal_mw_brutos_gas': f"{BASE_URL_B}/prediccion_mw_brutos_generacion_gas",
+    'canal_presion_agua_alimentacion_econ_ap': f"{BASE_URL_B}/prediccion_presion_agua_econ_ap",
 }
 
-# Mapeo de nombre de canal a campo del modelo (actualizado 2025-02-23)
+# Mapeo de nombre de canal a campo del modelo (actualizado 2026-02-25)
+# NOTA: Algunos canales son compartidos con Bomba A (tablas sin _b) porque
+# gm_influx inserta datos en esas tablas para ambas bombas.
 CANAL_TO_CAMPO = {
-    # Campos principales
+    # Campos exclusivos Bomba B
     'canal_sensores_corriente_b': 'corriente_motor',
     'canal_excentricidad_bomba_b': 'excentricidad_bomba',
     'canal_flujo_descarga_b': 'flujo_descarga_ap',
     'canal_flujo_agua_domo_ap_b': 'flujo_agua_domo_ap',
     'canal_flujo_agua_domo_mp_b': 'flujo_agua_domo_mp',
-    'canal_flujo_agua_recalentador_b': 'flujo_agua_recalentador',
-    'canal_flujo_agua_vapor_alta_b': 'flujo_agua_vapor_alta',
     'canal_presion_agua_b': 'presion_agua_ap',
-    'canal_temperatura_ambiental_b': 'temperatura_ambiental',
     'canal_temperatura_agua_alim_b': 'temperatura_agua_alim_ap',
     'canal_temperatura_estator_b': 'temperatura_estator',
     'canal_vibracion_axial_empuje_b': 'vibracion_axial',
     'canal_vibracion_x_descanso_b': 'vibracion_x_descanso',
     'canal_vibracion_y_descanso_b': 'vibracion_y_descanso',
-    'canal_voltaje_barra_b': 'voltaje_barra',
 
-    # Temperaturas descanso
+    # Temperaturas descanso (exclusivos Bomba B)
     'canal_temperatura_descanso_interno_bomba_b': 'temp_descanso_bomba',
     'canal_temperatura_descanso_interna_empuje_bomba_b': 'temp_descanso_empuje',
     'canal_temperatura_descanso_interna_motor_bomba_b': 'temp_descanso_motor',
 
-    # Vibraciones externas
+    # Vibraciones externas (exclusivos Bomba B)
     'canal_vibracion_x_descanso_externo_b': 'vibracion_x_externo',
     'canal_vibracion_y_descanso_externo_b': 'vibracion_y_externo',
 
-    # Nuevos campos
+    # Otros exclusivos Bomba B
     'canal_presion_succion_baa_b': 'presion_succion_baa',
     'canal_posicion_valvula_recirc_b': 'posicion_valvula_recirc',
-    'canal_flujo_domo_ap_compensated_b': 'flujo_domo_ap_compensated',
-    'canal_mw_brutos_generacion_gas_b': 'mw_brutos_generacion_gas',
-    'canal_presion_agua_econ_ap_b': 'presion_agua_econ_ap',
 
-    # Campo faltante
-    'canal_temperatura_estator_fase_b_b': 'temperatura_estator_b',
+    # Canales redirigidos a tablas compartidas con Bomba A
+    # (gm_influx inserta en estas tablas sin _b, no en versiones _b)
+    'canal_flujo_agua_recalentador': 'flujo_agua_recalentador',
+    'canal_flujo_agua_vapor_alta': 'flujo_agua_vapor_alta',
+    'canal_temperatura_ambiental': 'temperatura_ambiental',
+    'canal_voltaje_barra': 'voltaje_barra',
+    'canal_mw_brutos_gas': 'mw_brutos_generacion_gas',
+    'canal_presion_agua_alimentacion_econ_ap': 'presion_agua_econ_ap',
 }
 
-# Lista de canales a escuchar (usa CANAL_ENDPOINTS para incluir todos)
-CANALES = list(CANAL_ENDPOINTS.keys())
+# Lista de canales a escuchar (usa CANAL_TO_CAMPO para incluir todos)
+CANALES = list(CANAL_TO_CAMPO.keys())
 
 def conectar():
     """Establece una nueva conexión a la base de datos y configura los canales de escucha"""
@@ -221,7 +223,7 @@ def main():
                     required_fields = [
                         'corriente_motor', 'excentricidad_bomba', 'flujo_descarga_ap',
                         'flujo_agua_domo_ap', 'flujo_agua_domo_mp', 'flujo_agua_recalentador',
-                        'flujo_agua_vapor_alta', 'presion_agua_ap', 'temperatura_ambiental', 
+                        'flujo_agua_vapor_alta', 'presion_agua_ap', 'temperatura_ambiental',
                         'temperatura_agua_alim_ap', 'temperatura_estator', 'vibracion_axial',
                         'vibracion_x_descanso', 'vibracion_y_descanso', 'voltaje_barra'
                     ]
