@@ -63,6 +63,11 @@ CANAL_TO_CAMPO = {
     # Nuevos campos compartidos
     'canal_temperatura_agua_alim_domo_mp': 'temp_agua_alim_domo_mp',
     'canal_flujo_domo_ap_compensated': 'flujo_domo_ap_compensated',
+
+    # Canales faltantes
+    'canal_temperatura_estator_b': 'temperatura_estator_b',
+    'canal_temperatura_estator_c': 'temperatura_estator_c',
+    'canal_flujo_descarga': 'flujo_descarga',
 }
 
 # Mapeo CANAL -> ENDPOINT POST (actualizado 2025-02-23)
@@ -98,6 +103,11 @@ CANAL_ENDPOINTS = {
     # Nuevos endpoints compartidos
     'canal_temperatura_agua_alim_domo_mp': f"{BASE_URL}/prediccion_temperatura-agua-alim-domo-mp",
     'canal_flujo_domo_ap_compensated': f"{BASE_URL}/prediccion_flujo-domo-ap-compensated",
+
+    # Endpoints faltantes
+    'canal_temperatura_estator_b': f"{BASE_URL}/prediccion_temperatura-estator-b",
+    'canal_temperatura_estator_c': f"{BASE_URL}/prediccion_temperatura-estator-c",
+    'canal_flujo_descarga': f"{BASE_URL}/prediccion_flujo-descarga",
 }
 
 # Lista de canales a escuchar para bomba A

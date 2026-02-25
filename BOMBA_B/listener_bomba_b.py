@@ -65,6 +65,9 @@ CANAL_ENDPOINTS = {
     'canal_flujo_domo_ap_compensated_b': f"{BASE_URL_B}/prediccion_flujo_domo_ap_compensated",
     'canal_mw_brutos_generacion_gas_b': f"{BASE_URL_B}/prediccion_mw_brutos_generacion_gas",
     'canal_presion_agua_econ_ap_b': f"{BASE_URL_B}/prediccion_presion_agua_econ_ap",
+
+    # Endpoint faltante
+    'canal_temperatura_estator_fase_b_b': f"{BASE_URL_B}/prediccion_temperatura_estator_b",
 }
 
 # Mapeo de nombre de canal a campo del modelo (actualizado 2025-02-23)
@@ -101,6 +104,9 @@ CANAL_TO_CAMPO = {
     'canal_flujo_domo_ap_compensated_b': 'flujo_domo_ap_compensated',
     'canal_mw_brutos_generacion_gas_b': 'mw_brutos_generacion_gas',
     'canal_presion_agua_econ_ap_b': 'presion_agua_econ_ap',
+
+    # Campo faltante
+    'canal_temperatura_estator_fase_b_b': 'temperatura_estator_b',
 }
 
 # Lista de canales a escuchar (usa CANAL_ENDPOINTS para incluir todos)
