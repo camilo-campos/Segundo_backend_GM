@@ -21,7 +21,10 @@ DB_CONFIG = {
 }
 
 # URL base del backend para envío unificado
-BASE_URL_B = os.environ.get('BASE_URL_B')
+# Si BASE_URL_B no termina en /sensores_b, se agrega automaticamente
+BASE_URL_B = os.environ.get('BASE_URL_B', '').rstrip('/')
+if not BASE_URL_B.endswith('/sensores_b'):
+    BASE_URL_B = f"{BASE_URL_B}/sensores_b"
 PREDICCION_URL = f"{BASE_URL_B}/predecir-bomba-b"
 
 # API Key para autenticacion con el backend principal

@@ -20,7 +20,10 @@ DB_CONFIG = {
 }
 
 # URLs base del backend desde variables de entorno
-BASE_URL = os.environ.get('BASE_URL')
+# Si BASE_URL no termina en /sensores, se agrega automaticamente
+BASE_URL = os.environ.get('BASE_URL', '').rstrip('/')
+if not BASE_URL.endswith('/sensores'):
+    BASE_URL = f"{BASE_URL}/sensores"
 PREDICCION_URL = f"{BASE_URL}/predecir-bomba"
 
 # API Key para autenticacion con el backend principal
