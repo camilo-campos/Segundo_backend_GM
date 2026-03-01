@@ -240,34 +240,62 @@ def main():
                     
                     # Si tenemos todos los campos para este tiempo, enviamos a la predicción
                     if len(campos_presentes) == len(required_fields):
-                        print(f"Datos suficientes recopilados para tiempo {tiempo_sensor} ({len(campos_presentes)}/{len(required_fields)}), enviando a backend...")
-                        
+                        print(f"{'='*60}")
+                        print(f"PREDICCION GENERAL BOMBA B - INICIO")
+                        print(f"{'='*60}")
+                        print(f"Tiempo sensor: {tiempo_sensor}")
+                        print(f"Campos recopilados: {len(campos_presentes)}/{len(required_fields)}")
+
                         try:
+                            # Mostrar configuracion de URL
+                            print(f"BASE_URL_B configurada: {BASE_URL_B}")
+                            print(f"PREDICCION_URL: {PREDICCION_URL}")
+                            print(f"API_KEY (primeros 10 chars): {API_KEY[:10]}...")
+
                             # Mostrar los datos que se van a enviar
-                            print(f"Enviando datos para tiempo {tiempo_sensor}:")
-                            
-                            for campo, valor in datos_sensores.items():
-                                print(f"  - {campo}: {valor}")
-                                
-                            # Preparar los datos para enviar (sin incluir tiempo_sensor)
-                            datos_a_enviar = datos_sensores.copy()
-                            
+                            print(f"Datos a enviar ({len(datos_sensores)} campos):")
+                            for campo, valor in sorted(datos_sensores.items()):
+                                es_requerido = "REQUERIDO" if campo in required_fields else "EXTRA"
+                                print(f"  [{es_requerido}] {campo}: {valor}")
+
+                            # Filtrar solo los campos requeridos para el envio
+                            datos_a_enviar = {campo: datos_sensores[campo] for campo in required_fields if campo in datos_sensores}
+                            campos_extra = [c for c in datos_sensores if c not in required_fields]
+                            if campos_extra:
+                                print(f"NOTA: Se omiten {len(campos_extra)} campos extra del envio: {campos_extra}")
+                            print(f"Campos enviados al modelo: {len(datos_a_enviar)}")
+
+                            print(f"Enviando POST a: {PREDICCION_URL}")
                             res = requests.post(PREDICCION_URL, json=datos_a_enviar, headers=HEADERS, timeout=60)
+                            print(f"Respuesta HTTP: {res.status_code}")
                             if res.status_code == 200:
-                                print(f"Predicción unificada enviada exitosamente para tiempo {tiempo_sensor}: {res.status_code}")
+                                print(f"PREDICCION GENERAL BOMBA B - EXITOSA")
                                 try:
-                                    print(f"  Respuesta: {res.json()}")
+                                    resp_json = res.json()
+                                    print(f"  Respuesta JSON: {resp_json}")
                                 except:
-                                    print(f"  Respuesta: {res.text[:100] if res.text else 'Sin contenido'}")
+                                    print(f"  Respuesta texto: {res.text[:200] if res.text else 'Sin contenido'}")
                                 # Eliminar este conjunto de datos después del envío exitoso
                                 del datos_por_tiempo[tiempo_sensor]
                             else:
-                                print(f"Error {res.status_code} al enviar la predicción unificada para tiempo {tiempo_sensor}")
-                                print(f"  Respuesta: {res.text[:200] if res.text else 'Sin contenido'}")
+                                print(f"PREDICCION GENERAL BOMBA B - ERROR {res.status_code}")
+                                print(f"  URL usada: {PREDICCION_URL}")
+                                print(f"  Headers: {HEADERS}")
+                                print(f"  Respuesta: {res.text[:500] if res.text else 'Sin contenido'}")
+                        except requests.exceptions.ConnectionError as e:
+                            print(f"PREDICCION GENERAL BOMBA B - ERROR DE CONEXION")
+                            print(f"  No se pudo conectar a: {PREDICCION_URL}")
+                            print(f"  Error: {e}")
+                        except requests.exceptions.Timeout as e:
+                            print(f"PREDICCION GENERAL BOMBA B - TIMEOUT")
+                            print(f"  URL: {PREDICCION_URL}")
+                            print(f"  Error: {e}")
                         except Exception as e:
-                            print(f"Error al enviar la predicción unificada para tiempo {tiempo_sensor}: {e}")
+                            print(f"PREDICCION GENERAL BOMBA B - ERROR INESPERADO")
+                            print(f"  Error: {e}")
                             import traceback
                             traceback.print_exc()
+                        print(f"{'='*60}")
                     
                     # Limpieza de conjuntos antiguos incompletos
                     if len(datos_por_tiempo) > 10:
