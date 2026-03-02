@@ -202,10 +202,16 @@ def main():
                         datos_por_tiempo[tiempo_sensor] = {}
                     
                     # Almacenar el valor en nuestro diccionario de datos
+                    # Guardar valores en el diccionario de datos
+                    # Si el valor es None, se usa 0.0 como valor por defecto
                     if canal in CANAL_TO_CAMPO:
                         campo = CANAL_TO_CAMPO[canal]
-                        datos_por_tiempo[tiempo_sensor][campo] = payload.get('valor')
-                        print(f"Guardado '{campo}' para tiempo {tiempo_sensor}: {payload.get('valor')}")
+                        valor = payload.get('valor')
+                        if valor is None:
+                            print(f"ADVERTENCIA: '{campo}' tiene valor None para tiempo {tiempo_sensor}, usando 0.0 por defecto")
+                            valor = 0.0
+                        datos_por_tiempo[tiempo_sensor][campo] = valor
+                        print(f"Guardado '{campo}' para tiempo {tiempo_sensor}: {valor}")
                         
                         # Opcional: enviar también a la ruta individual (sin el tiempo_sensor)
                         try:
@@ -302,10 +308,13 @@ def main():
                         print(f"Esperando más datos. Faltan {len(campos_faltantes)} campos: {campos_faltantes}")
 
                     # Limpieza de conjuntos antiguos incompletos
+                    # IMPORTANTE: Nunca eliminar el timestamp que se esta procesando actualmente
                     if len(datos_por_tiempo) > 10:
                         print("Limpiando conjuntos de datos antiguos incompletos...")
                         tiempos_ordenados = sorted(datos_por_tiempo.keys())
                         for t in tiempos_ordenados[:-10]:
+                            if t == tiempo_sensor:
+                                continue
                             if len(datos_por_tiempo[t]) < len(campos_requeridos):
                                 print(f"Eliminando conjunto incompleto para tiempo {t} con {len(datos_por_tiempo[t])}/{len(campos_requeridos)} campos")
                                 del datos_por_tiempo[t]
