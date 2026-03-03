@@ -46,6 +46,7 @@ CANAL_ENDPOINTS = {
     'canal_flujo_agua_domo_mp_b': f"{BASE_URL_B}/prediccion_flujo_agua_domo_mp",
     'canal_presion_agua_b': f"{BASE_URL_B}/prediccion_presion_agua",
     'canal_temperatura_agua_alim_b': f"{BASE_URL_B}/prediccion_temperatura_agua_alim",
+    'canal_temperatura_agua_alim_ap_b': f"{BASE_URL_B}/prediccion_temperatura_agua_alim",
     'canal_temperatura_estator_b': f"{BASE_URL_B}/prediccion_temperatura_estator",
     'canal_vibracion_axial_empuje_b': f"{BASE_URL_B}/prediccion_vibracion_axial_empuje",
     'canal_vibracion_x_descanso_b': f"{BASE_URL_B}/prediccion_vibracion_x_descanso",
@@ -86,6 +87,8 @@ CANAL_TO_CAMPO = {
     'canal_flujo_agua_domo_mp_b': 'flujo_agua_domo_mp',
     'canal_presion_agua_b': 'presion_agua_ap',
     'canal_temperatura_agua_alim_b': 'temperatura_agua_alim_ap',
+    # La tabla temperatura_agua_alim_b esta vacia, los datos reales estan en temperatura_agua_alim_ap_b
+    'canal_temperatura_agua_alim_ap_b': 'temperatura_agua_alim_ap',
     'canal_temperatura_estator_b': 'temperatura_estator',
     'canal_vibracion_axial_empuje_b': 'vibracion_axial',
     'canal_vibracion_x_descanso_b': 'vibracion_x_descanso',
